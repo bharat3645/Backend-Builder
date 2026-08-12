@@ -17,8 +17,10 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
+# Root-level only (Python sdist/build artifact dirs) - unanchored `lib/`
+# would also match src/lib/, which is real, tracked frontend source.
+/lib/
+/lib64/
 parts/
 sdist/
 var/
