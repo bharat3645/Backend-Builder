@@ -1,0 +1,328 @@
+# InfraNest DSL Example - Blog API
+# This file demonstrates the DSL syntax for describing backend systems
+
+meta:
+  name: "blog-api"
+  description: "A comprehensive blog API with users, posts, and comments"
+  version: "1.0.0"
+  framework: "django"  # Options: django, go-fiber, rails
+  database: "postgresql"
+  
+auth:
+  provider: "jwt"
+  user_model: "User"
+  required_fields: ["email", "password"]
+  optional_fields: ["first_name", "last_name", "bio", "avatar"]
+  
+models:
+  User:
+    fields:
+      id: 
+        type: "uuid"
+        primary_key: true
+        auto_generated: true
+      email:
+        type: "string"
+        unique: true
+        required: true
+        max_length: 255
+      password:
+        type: "string"
+        required: true
+        hashed: true
+      first_name:
+        type: "string"
+        max_length: 100
+      last_name:
+        type: "string"
+        max_length: 100
+      bio:
+        type: "text"
+      avatar:
+        type: "url"
+      is_active:
+        type: "boolean"
+        default: true
+      created_at:
+        type: "datetime"
+        auto_now_add: true
+      updated_at:
+        type: "datetime"
+        auto_now: true
+    
+    permissions:
+      read: ["owner", "admin"]
+      write: ["owner", "admin"]
+      create: ["authenticated"]
+      delete: ["owner", "admin"]
+
+  Post:
+    fields:
+      id:
+        type: "uuid"
+        primary_key: true
+        auto_generated: true
+      title:
+        type: "string"
+        required: true
+        max_length: 200
+      slug:
+        type: "string"
+        unique: true
+        auto_generated: true
+        source: "title"
+      content:
+        type: "text"
+        required: true
+      excerpt:
+        type: "text"
+        max_length: 500
+      status:
+        type: "choice"
+        choices: ["draft", "published", "archived"]
+        default: "draft"
+      featured_image:
+        type: "url"
+      author:
+        type: "foreign_key"
+        model: "User"
+        on_delete: "cascade"
+      tags:
+        type: "many_to_many"
+        model: "Tag"
+      published_at:
+        type: "datetime"
+        "null": true
+      created_at:
+        type: "datetime"
+        auto_now_add: true
+      updated_at:
+        type: "datetime"
+        auto_now: true
+    
+    permissions:
+      read: ["public"]
+      write: ["owner", "admin"]
+      create: ["authenticated"]
+      delete: ["owner", "admin"]
+    
+    indexes:
+      - fields: ["status", "published_at"]
+      - fields: ["author", "created_at"]
+
+  Comment:
+    fields:
+      id:
+        type: "uuid"
+        primary_key: true
+        auto_generated: true
+      content:
+        type: "text"
+        required: true
+      author:
+        type: "foreign_key"
+        model: "User"
+        on_delete: "cascade"
+      post:
+        type: "foreign_key"
+        model: "Post"
+        on_delete: "cascade"
+      parent:
+        type: "foreign_key"
+        model: "Comment"
+        "null": true
+        on_delete: "cascade"
+      is_approved:
+        type: "boolean"
+        default: false
+      created_at:
+        type: "datetime"
+        auto_now_add: true
+      updated_at:
+        type: "datetime"
+        auto_now: true
+    
+    permissions:
+      read: ["public"]
+      write: ["owner", "admin"]
+      create: ["authenticated"]
+      delete: ["owner", "admin"]
+
+  Tag:
+    fields:
+      id:
+        type: "uuid"
+        primary_key: true
+        auto_generated: true
+      name:
+        type: "string"
+        required: true
+        unique: true
+        max_length: 50
+      slug:
+        type: "string"
+        unique: true
+        auto_generated: true
+        source: "name"
+      color:
+        type: "string"
+        max_length: 7
+        default: "#3B82F6"
+      created_at:
+        type: "datetime"
+        auto_now_add: true
+    
+    permissions:
+      read: ["public"]
+      write: ["admin"]
+      create: ["admin"]
+      delete: ["admin"]
+
+api:
+  base_path: "/api/v1"
+  rate_limiting:
+    enabled: true
+    requests_per_minute: 1000
+    burst: 2000
+  
+  endpoints:
+    # Authentication
+    - path: "/auth/register"
+      method: "POST"
+      handler: "auth.register"
+      public: true
+      
+    - path: "/auth/login"
+      method: "POST"
+      handler: "auth.login"
+      public: true
+      
+    - path: "/auth/logout"
+      method: "POST"
+      handler: "auth.logout"
+      auth_required: true
+      
+    # Users
+    - path: "/users"
+      method: "GET"
+      handler: "users.list"
+      auth_required: true
+      permissions: ["admin"]
+      
+    - path: "/users/{id}"
+      method: "GET"
+      handler: "users.retrieve"
+      auth_required: true
+      
+    - path: "/users/{id}"
+      method: "PUT"
+      handler: "users.update"
+      auth_required: true
+      permissions: ["owner", "admin"]
+      
+    # Posts
+    - path: "/posts"
+      method: "GET"
+      handler: "posts.list"
+      public: true
+      filters: ["status", "author", "tags"]
+      search: ["title", "content"]
+      ordering: ["created_at", "published_at", "title"]
+      
+    - path: "/posts"
+      method: "POST"
+      handler: "posts.create"
+      auth_required: true
+      
+    - path: "/posts/{slug}"
+      method: "GET"
+      handler: "posts.retrieve"
+      public: true
+      
+    - path: "/posts/{slug}"
+      method: "PUT"
+      handler: "posts.update"
+      auth_required: true
+      permissions: ["owner", "admin"]
+      
+    - path: "/posts/{slug}"
+      method: "DELETE"
+      handler: "posts.delete"
+      auth_required: true
+      permissions: ["owner", "admin"]
+      
+    # Comments
+    - path: "/posts/{post_slug}/comments"
+      method: "GET"
+      handler: "comments.list"
+      public: true
+      
+    - path: "/posts/{post_slug}/comments"
+      method: "POST"
+      handler: "comments.create"
+      auth_required: true
+      
+    - path: "/comments/{id}"
+      method: "PUT"
+      handler: "comments.update"
+      auth_required: true
+      permissions: ["owner", "admin"]
+      
+    - path: "/comments/{id}"
+      method: "DELETE"
+      handler: "comments.delete"
+      auth_required: true
+      permissions: ["owner", "admin"]
+
+jobs:
+  # Email notifications
+  - name: "send_welcome_email"
+    trigger: "user.created"
+    handler: "jobs.send_welcome_email"
+    retry_count: 3
+    
+  - name: "send_comment_notification"
+    trigger: "comment.created"
+    handler: "jobs.send_comment_notification"
+    retry_count: 2
+    
+  # Content processing
+  - name: "generate_post_excerpt"
+    trigger: "post.created"
+    handler: "jobs.generate_post_excerpt"
+    
+  - name: "update_search_index"
+    trigger: ["post.created", "post.updated"]
+    handler: "jobs.update_search_index"
+
+deployment:
+  environment: "production"
+  
+  docker:
+    base_image: "python:3.11-slim"
+    port: 8000
+    health_check: "/health"
+    
+  database:
+    engine: "postgresql"
+    version: "15"
+    pool_size: 20
+    
+  cache:
+    engine: "redis"
+    version: "7"
+    
+  storage:
+    type: "s3"
+    bucket: "blog-api-media"
+    
+  monitoring:
+    logging: true
+    metrics: true
+    tracing: true
+    
+  scaling:
+    min_instances: 2
+    max_instances: 10
+    cpu_threshold: 70
+    memory_threshold: 80

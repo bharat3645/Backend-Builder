@@ -1,0 +1,72 @@
+"""
+Django Model Template for InfraNest
+Generated models based on DSL specification
+"""
+from django.db import models
+from django.contrib.auth.models import AbstractUser
+import uuid
+
+{% for model_name, model_config in models.items() %}
+class {{ model_name }}({% if model_name == auth.user_model %}AbstractUser{% else %}models.Model{% endif %}):
+    """{{ model_config.description | default(model_name + ' model') }}"""
+    {% for field_name, field_config in model_config.fields.items() %}
+    {% if field_config.type == 'string' %}
+    {{ field_name }} = models.CharField(max_length={{ field_config.max_length | default(255) }}{% if field_config.required %}, null=False, blank=False{% else %}, null=True, blank=True{% endif %}{% if field_config.unique %}, unique=True{% endif %}{% if field_config.default %}, default="{{ field_config.default }}"{% endif %})
+    {% elif field_config.type == 'text' %}
+    {{ field_name }} = models.TextField({% if field_config.required %}null=False, blank=False{% else %}null=True, blank=True{% endif %}{% if field_config.default %}, default="{{ field_config.default }}"{% endif %})
+    {% elif field_config.type == 'integer' %}
+    {{ field_name }} = models.IntegerField({% if field_config.required %}null=False{% else %}null=True{% endif %}{% if field_config.default is not none %}, default={{ field_config.default }}{% endif %})
+    {% elif field_config.type == 'float' %}
+    {{ field_name }} = models.FloatField({% if field_config.required %}null=False{% else %}null=True{% endif %}{% if field_config.default is not none %}, default={{ field_config.default }}{% endif %})
+    {% elif field_config.type == 'boolean' %}
+    {{ field_name }} = models.BooleanField(default={% if field_config.default %}True{% else %}False{% endif %})
+    {% elif field_config.type == 'datetime' %}
+    {{ field_name }} = models.DateTimeField({% if field_config.auto_now_add %}auto_now_add=True{% elif field_config.auto_now %}auto_now=True{% else %}null=True, blank=True{% endif %})
+    {% elif field_config.type == 'date' %}
+    {{ field_name }} = models.DateField({% if field_config.auto_now_add %}auto_now_add=True{% elif field_config.auto_now %}auto_now=True{% else %}null=True, blank=True{% endif %})
+    {% elif field_config.type == 'uuid' %}
+    {{ field_name }} = models.UUIDField({% if field_config.primary_key %}primary_key=True{% if field_config.auto_generated %}, default=uuid.uuid4, editable=False{% endif %}{% elif field_config.auto_generated %}default=uuid.uuid4, editable=False{% else %}null=True, blank=True{% endif %})
+    {% elif field_config.type == 'url' %}
+    {{ field_name }} = models.URLField({% if field_config.required %}null=False, blank=False{% else %}null=True, blank=True{% endif %})
+    {% elif field_config.type == 'email' %}
+    {{ field_name }} = models.EmailField({% if field_config.required %}null=False, blank=False{% else %}null=True, blank=True{% endif %}{% if field_config.unique %}, unique=True{% endif %})
+    {% elif field_config.type == 'foreign_key' %}
+    {{ field_name }} = models.ForeignKey('{{ field_config.model }}', on_delete=models.{{ field_config.on_delete | upper | default('CASCADE') }}{% if field_config.null %}, null=True, blank=True{% endif %}, related_name='{{ model_name.lower() }}_{{ field_name }}_set')
+    {% elif field_config.type == 'many_to_many' %}
+    {{ field_name }} = models.ManyToManyField('{{ field_config.model }}', blank=True, related_name='{{ model_name.lower() }}_{{ field_name }}_set')
+    {% elif field_config.type == 'choice' %}
+    {{ field_name.upper() }}_CHOICES = [
+        {% for choice in field_config.choices %}
+        ('{{ choice }}', '{{ choice.title() }}'),
+        {% endfor %}
+    ]
+    {{ field_name }} = models.CharField(max_length=50, choices={{ field_name.upper() }}_CHOICES{% if field_config.default %}, default='{{ field_config.default }}'{% endif %})
+    {% elif field_config.type == 'json' %}
+    {{ field_name }} = models.JSONField({% if field_config.required %}null=False{% else %}null=True, blank=True{% endif %}{% if field_config.default %}, default=dict{% endif %})
+    {% endif %}
+    {% endfor %}
+    {% if model_name == auth.user_model %}
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']
+    {% endif %}
+
+    class Meta:
+        pass
+        {% if model_config.verbose_name %}
+        verbose_name = "{{ model_config.verbose_name }}"
+        {% endif %}
+        {% if model_config.verbose_name_plural %}
+        verbose_name_plural = "{{ model_config.verbose_name_plural }}"
+        {% endif %}
+        {% if model_config.ordering %}
+        ordering = [{% for field in model_config.ordering %}'{{ field }}'{% if not loop.last %}, {% endif %}{% endfor %}]
+        {% endif %}
+
+    def __str__(self):
+        {% if model_config.str_field %}
+        return str(self.{{ model_config.str_field }})
+        {% else %}
+        return f"{{ model_name }} {self.pk}"
+        {% endif %}
+
+{% endfor %}

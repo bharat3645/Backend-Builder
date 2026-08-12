@@ -1,0 +1,45 @@
+FROM python:{{ python_version | default('3.11') }}-slim
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Set work directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    {% if meta.database == 'postgresql' %}
+    libpq-dev \
+    {% elif meta.database == 'mysql' %}
+    default-libmysqlclient-dev \
+    {% endif %}
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy project
+COPY . .
+
+# Create non-root user
+RUN adduser --disabled-password --gecos '' --uid 1000 appuser
+RUN chown -R appuser:appuser /app
+USER appuser
+
+# Collect static files
+RUN python manage.py collectstatic --noinput
+
+# Expose port
+EXPOSE {{ deployment.docker.port | default(8000) }}
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:{{ deployment.docker.port | default(8000) }}{{ deployment.docker.health_check | default('/health/') }} || exit 1
+
+# Run application
+CMD ["gunicorn", "{{ meta.name.replace('-', '_') }}.wsgi:application", "--bind", "0.0.0.0:{{ deployment.docker.port | default(8000) }}"]

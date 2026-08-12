@@ -1,0 +1,66 @@
+"""
+Django REST Framework Serializers for InfraNest
+Generated serializers based on DSL specification
+"""
+from rest_framework import serializers
+from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
+{% for model_name, model_config in models.items() %}
+from .models import {{ model_name }}
+{% endfor %}
+
+User = get_user_model()
+
+{% for model_name, model_config in models.items() %}
+class {{ model_name }}Serializer(serializers.ModelSerializer):
+    """Serializer for {{ model_name }} model"""
+    
+    class Meta:
+        model = {{ model_name }}
+        fields = [
+            {% for field_name, field_config in model_config.fields.items() %}
+            '{{ field_name }}',
+            {% endfor %}
+        ]
+        read_only_fields = [
+            {% for field_name, field_config in model_config.fields.items() %}
+            {% if field_config.auto_generated or field_config.auto_now_add or field_config.auto_now %}
+            '{{ field_name }}',
+            {% endif %}
+            {% endfor %}
+        ]
+        
+        {% if model_config.extra_kwargs %}
+        extra_kwargs = {{ model_config.extra_kwargs | tojson }}
+        {% endif %}
+
+{% if model_name == auth.user_model %}
+class UserRegistrationSerializer(serializers.ModelSerializer):
+    """Serializer for user registration"""
+    password = serializers.CharField(write_only=True, validators=[validate_password])
+    password_confirm = serializers.CharField(write_only=True)
+    
+    class Meta:
+        model = User
+        fields = [
+            {% for field in auth.required_fields %}
+            '{{ field }}',
+            {% endfor %}
+            {% for field in auth.optional_fields %}
+            '{{ field }}',
+            {% endfor %}
+            'password',
+            'password_confirm'
+        ]
+    
+    def validate(self, attrs):
+        if attrs['password'] != attrs['password_confirm']:
+            raise serializers.ValidationError("Passwords don't match")
+        return attrs
+    
+    def create(self, validated_data):
+        validated_data.pop('password_confirm')
+        return User.objects.create_user(**validated_data)
+
+{% endif %}
+{% endfor %}

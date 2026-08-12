@@ -1,0 +1,368 @@
+openapi: 3.0.3
+info:
+  title: InfraNest Core Generation Engine API
+  description: >
+    Converts a DSL specification (or a natural-language prompt) into a real,
+    runnable backend project for Django + DRF, Go Fiber + GORM, or Ruby on
+    Rails. Served by the Flask app in `core/app.py`. Interactive docs are at
+    `/docs`; this document is served as-is at `/openapi.yaml`.
+  version: "1.0.0"
+  license:
+    name: MIT
+externalDocs:
+  description: Project README
+  url: https://github.com/bharat3645/InfraNest#readme
+servers:
+  - url: http://localhost:8000
+    description: Local development
+tags:
+  - name: System
+  - name: DSL
+  - name: Generation
+
+paths:
+  /health:
+    get:
+      tags: [System]
+      summary: Health check
+      operationId: healthCheck
+      responses:
+        "200":
+          description: Service is up
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: healthy }
+                  timestamp: { type: string, format: date-time }
+                  version: { type: string, example: "1.0.0" }
+
+  /metrics:
+    get:
+      tags: [System]
+      summary: Prometheus metrics (only present when prometheus-flask-exporter is installed)
+      operationId: metrics
+      responses:
+        "200":
+          description: Prometheus text-format metrics
+          content:
+            text/plain:
+              schema: { type: string }
+
+  /api/v1/frameworks:
+    get:
+      tags: [Generation]
+      summary: List supported backend frameworks
+      operationId: listFrameworks
+      responses:
+        "200":
+          description: Supported frameworks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  frameworks:
+                    type: array
+                    items: { $ref: "#/components/schemas/Framework" }
+
+  /api/v1/parse-prompt:
+    post:
+      tags: [DSL]
+      summary: Convert a natural-language description into a DSL specification
+      description: >
+        Uses an LLM (OpenAI or Anthropic) when `OPENAI_API_KEY` /
+        `ANTHROPIC_API_KEY` is configured server-side; otherwise falls back
+        to a deterministic keyword-based generator so the endpoint always
+        returns something usable.
+      operationId: parsePrompt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [prompt]
+              properties:
+                prompt:
+                  type: string
+                  maxLength: 4000
+                  example: "A blog API with posts, comments, and tags"
+      responses:
+        "200":
+          description: Generated DSL specification
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  dsl: { $ref: "#/components/schemas/DSLSpec" }
+                  timestamp: { type: string, format: date-time }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /api/v1/validate-dsl:
+    post:
+      tags: [DSL]
+      summary: Validate a DSL specification
+      operationId: validateDSL
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [dsl]
+              properties:
+                dsl: { $ref: "#/components/schemas/DSLSpec" }
+      responses:
+        "200":
+          description: >
+            Validation result. Note this always returns 200 - an invalid
+            spec is reported via `valid: false` and `errors`, not an HTTP
+            error status, since "the DSL is invalid" is the expected answer
+            for this endpoint, not a failure of the request itself.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ValidationResult" }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /api/v1/generate-code:
+    post:
+      tags: [Generation]
+      summary: Generate a backend project from a DSL specification
+      description: >
+        Returns generated files inline as JSON by default. Pass
+        `"format": "zip"` in the body (or `?format=zip` as a query param) to
+        get a downloadable zip archive instead.
+      operationId: generateCode
+      parameters:
+        - in: query
+          name: format
+          schema: { type: string, enum: [json, zip] }
+          required: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [dsl, framework]
+              properties:
+                dsl: { $ref: "#/components/schemas/DSLSpec" }
+                framework: { $ref: "#/components/schemas/FrameworkId" }
+                format: { type: string, enum: [json, zip], default: json }
+      responses:
+        "200":
+          description: Generated project
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/GeneratedProject" }
+            application/zip:
+              schema: { type: string, format: binary }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /api/v1/preview-code:
+    post:
+      tags: [Generation]
+      summary: Preview the file listing a generation would produce, without file content
+      operationId: previewCode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [dsl, framework]
+              properties:
+                dsl: { $ref: "#/components/schemas/DSLSpec" }
+                framework: { $ref: "#/components/schemas/FrameworkId" }
+      responses:
+        "200":
+          description: File listing preview
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  framework: { $ref: "#/components/schemas/FrameworkId" }
+                  project_name: { type: string }
+                  preview:
+                    type: object
+                    properties:
+                      file_count: { type: integer }
+                      files:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            path: { type: string }
+                            type: { type: string }
+                            description: { type: string }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+components:
+  responses:
+    BadRequest:
+      description: Invalid request (bad DSL, unknown framework, malformed JSON, ...)
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  schemas:
+    FrameworkId:
+      type: string
+      enum: [django, go-fiber, rails]
+
+    Framework:
+      type: object
+      properties:
+        id: { $ref: "#/components/schemas/FrameworkId" }
+        name: { type: string }
+        description: { type: string }
+        language: { type: string }
+        features:
+          type: array
+          items: { type: string }
+
+    ErrorResponse:
+      type: object
+      properties:
+        error: { type: string }
+        details:
+          description: Optional structured detail (e.g. the list of supported frameworks)
+          nullable: true
+
+    FieldConfig:
+      type: object
+      description: One field of a model. `type` is required; everything else depends on it.
+      required: [type]
+      properties:
+        type:
+          type: string
+          enum:
+            - string
+            - text
+            - integer
+            - float
+            - boolean
+            - datetime
+            - date
+            - uuid
+            - url
+            - email
+            - json
+            - foreign_key
+            - many_to_many
+            - choice
+        primary_key: { type: boolean }
+        auto_generated: { type: boolean }
+        required: { type: boolean }
+        unique: { type: boolean }
+        max_length: { type: integer }
+        default: {}
+        hashed:
+          type: boolean
+          description: Hash this field's value before persisting (e.g. a password).
+        auto_now_add: { type: boolean }
+        auto_now: { type: boolean }
+        model:
+          type: string
+          description: Target model name, required for foreign_key / many_to_many fields.
+        on_delete:
+          type: string
+          enum: [cascade, set_null, protect, restrict]
+        choices:
+          type: array
+          items: { type: string }
+
+    ModelConfig:
+      type: object
+      required: [fields]
+      properties:
+        fields:
+          type: object
+          additionalProperties: { $ref: "#/components/schemas/FieldConfig" }
+        permissions:
+          type: object
+          properties:
+            read: { type: array, items: { type: string } }
+            write: { type: array, items: { type: string } }
+            create: { type: array, items: { type: string } }
+            delete: { type: array, items: { type: string } }
+
+    DSLSpec:
+      type: object
+      required: [meta, models]
+      properties:
+        meta:
+          type: object
+          required: [name, version, framework]
+          properties:
+            name:
+              type: string
+              pattern: "^[a-z0-9-_]+$"
+            description: { type: string }
+            version: { type: string }
+            framework: { $ref: "#/components/schemas/FrameworkId" }
+            database: { type: string, default: postgresql }
+        auth:
+          type: object
+          properties:
+            provider: { type: string, enum: [jwt, oauth2, custom] }
+            user_model: { type: string }
+            required_fields: { type: array, items: { type: string } }
+            optional_fields: { type: array, items: { type: string } }
+        models:
+          type: object
+          additionalProperties: { $ref: "#/components/schemas/ModelConfig" }
+        api:
+          type: object
+          properties:
+            base_path: { type: string, default: /api/v1 }
+            endpoints:
+              type: array
+              items:
+                type: object
+                required: [path, method, handler]
+                properties:
+                  path: { type: string }
+                  method: { type: string }
+                  handler: { type: string }
+                  public: { type: boolean }
+                  auth_required: { type: boolean }
+        jobs:
+          type: array
+          items: { type: object }
+        deployment:
+          type: object
+          properties:
+            docker:
+              type: object
+              properties:
+                port: { type: integer, default: 8000 }
+                health_check: { type: string, default: /health }
+
+    ValidationResult:
+      type: object
+      properties:
+        valid: { type: boolean }
+        errors: { type: array, items: { type: string } }
+        warnings: { type: array, items: { type: string } }
+
+    GeneratedProject:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        project_name: { type: string }
+        framework: { $ref: "#/components/schemas/FrameworkId" }
+        files:
+          type: object
+          description: Map of relative file path -> file content
+          additionalProperties: { type: string }
+        file_count: { type: integer }
+        timestamp: { type: string, format: date-time }

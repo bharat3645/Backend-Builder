@@ -1,0 +1,90 @@
+"""
+Django REST Framework Views for InfraNest
+Generated views based on DSL specification
+"""
+from rest_framework import viewsets, status, permissions
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
+{% for model_name, model_config in models.items() %}
+from .models import {{ model_name }}
+from .serializers import {{ model_name }}Serializer
+{% endfor %}
+
+{% for model_name, model_config in models.items() %}
+class {{ model_name }}ViewSet(viewsets.ModelViewSet):
+    """ViewSet for {{ model_name }} model"""
+    queryset = {{ model_name }}.objects.all()
+    serializer_class = {{ model_name }}Serializer
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    
+    # Permissions
+    {% if model_config.permissions %}
+    def get_permissions(self):
+        """Get permissions based on action"""
+        if self.action in ['create']:
+            {% if 'authenticated' in model_config.permissions.create %}
+            permission_classes = [IsAuthenticated]
+            {% else %}
+            permission_classes = [AllowAny]
+            {% endif %}
+        elif self.action in ['list', 'retrieve']:
+            {% if 'public' in model_config.permissions.read %}
+            permission_classes = [AllowAny]
+            {% else %}
+            permission_classes = [IsAuthenticated]
+            {% endif %}
+        else:
+            permission_classes = [IsAuthenticated]
+        
+        return [permission() for permission in permission_classes]
+    {% endif %}
+    
+    # Filtering
+    {% if model_config.filterset_fields %}
+    filterset_fields = {{ model_config.filterset_fields | tojson }}
+    {% endif %}
+    
+    # Search
+    {% if model_config.search_fields %}
+    search_fields = {{ model_config.search_fields | tojson }}
+    {% endif %}
+    
+    # Ordering
+    {% if model_config.ordering_fields %}
+    ordering_fields = {{ model_config.ordering_fields | tojson }}
+    {% endif %}
+    
+    def get_queryset(self):
+        """Get queryset based on permissions"""
+        queryset = self.queryset
+        
+        # Apply ownership filtering if needed
+        {% if model_config.permissions and 'owner' in model_config.permissions.read %}
+        if self.request.user.is_authenticated:
+            # Filter by owner if user field exists
+            if hasattr(self.queryset.model, 'user'):
+                queryset = queryset.filter(user=self.request.user)
+            elif hasattr(self.queryset.model, 'author'):
+                queryset = queryset.filter(author=self.request.user)
+        {% endif %}
+        
+        return queryset
+    
+    def perform_create(self, serializer):
+        """Set user when creating objects"""
+        # Auto-assign user if model has user/author field
+        {% if model_config.permissions and 'authenticated' in model_config.permissions.create %}
+        if hasattr(serializer.Meta.model, 'user') and self.request.user.is_authenticated:
+            serializer.save(user=self.request.user)
+        elif hasattr(serializer.Meta.model, 'author') and self.request.user.is_authenticated:
+            serializer.save(author=self.request.user)
+        else:
+            serializer.save()
+        {% else %}
+        serializer.save()
+        {% endif %}
+
+{% endfor %}

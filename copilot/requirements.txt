@@ -1,0 +1,13 @@
+# CLI framework
+click==8.1.7
+rich==13.7.0
+
+# HTTP client
+requests==2.31.0
+
+# YAML processing
+PyYAML==6.0.1
+
+# Development tools
+pytest==7.4.3
+black==23.11.0

@@ -1,0 +1,79 @@
+# Dependencies
+node_modules/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Generated code
+/apps/generated/
+/examples/generated/
+
+# Secrets
+.env
+.env.local
+.env.production
+*.pem
+*.key
+
+# Docker
+.docker/
+
+# Logs
+logs/
+*.log
+
+# Coverage
+coverage/
+.coverage
+htmlcov/
+coverage.xml
+
+# Next.js
+.next/
+out/
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
