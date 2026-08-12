@@ -1,5 +1,5 @@
 """
-DSL Parser for InfraNest
+DSL Parser for Backend Builder
 Validates and parses DSL specifications into structured data
 """
 
@@ -10,7 +10,7 @@ from datetime import datetime
 import re
 
 class DSLParser:
-    """Parser for InfraNest DSL specifications"""
+    """Parser for Backend Builder DSL specifications"""
     
     def __init__(self):
         self.required_sections = ['meta', 'models']

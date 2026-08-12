@@ -40,7 +40,7 @@ module Api
       end
 
       def post_params
-        params.require(:post).permit(:author_id, :content, :created_at, :excerpt, :featured_image, :published_at, :status, :title, :updated_at, tag_ids: [])
+        params.require(:post).permit(:title, :content, :excerpt, :status, :featured_image, :author_id, :published_at, :created_at, :updated_at, tag_ids: [])
       end
     end
   end

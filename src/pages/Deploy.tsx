@@ -15,7 +15,7 @@ import { api, DeploymentProvider } from '../lib/api';
 import toast from 'react-hot-toast';
 
 const Deploy: React.FC = () => {
-  const { currentProject, isDeploying, setIsDeploying } = useProjectData();
+  const { currentProject, isDeploying, setIsDeploying, updateProjectStatus } = useProjectData();
   const { addNotification } = useUIState();
   const [selectedProvider, setSelectedProvider] = useState('railway');
   const [deploymentStatus, setDeploymentStatus] = useState<string | null>(null);
@@ -88,7 +88,8 @@ const Deploy: React.FC = () => {
       const result = await api.deployProject(currentProject.id, selectedProvider, deploymentConfig);
       setDeploymentStatus('success');
       setDeploymentUrl(result.url ?? null);
-      toast.success('Deployment successful!');
+      updateProjectStatus(currentProject.id, 'deployed');
+      toast.success('Simulated deployment complete (no cloud infrastructure was provisioned)');
       addNotification({
         type: 'success',
         title: 'Deployment Complete',
@@ -145,6 +146,18 @@ const Deploy: React.FC = () => {
           <h1 className="text-4xl font-bold text-white">Deploy Your Backend</h1>
           <p className="text-gray-400 max-w-2xl mx-auto">
             Deploy your generated backend to the cloud with one click. Choose your preferred hosting provider and we'll handle the rest.
+          </p>
+        </div>
+
+        {/* Honest disclosure: there is no real cloud deployment backend yet
+            (see README "Project Status"). This page walks through the UX
+            end to end, but nothing below actually provisions infrastructure. */}
+        <div className="flex items-start space-x-3 bg-[#ffaa00]/10 border border-[#ffaa00]/30 rounded-lg p-4 max-w-3xl mx-auto">
+          <AlertTriangle className="w-5 h-5 text-[#ffaa00] flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-[#ffaa00]">
+            <strong>Simulated:</strong> deploying here does not provision any real cloud
+            infrastructure - no server is created and the resulting URL will not resolve. This
+            page demonstrates the intended UX ahead of a real deployment integration.
           </p>
         </div>
 
@@ -275,7 +288,7 @@ const Deploy: React.FC = () => {
               <div className="bg-[#00ff88]/10 border border-[#00ff88]/50 rounded-lg p-6">
                 <div className="flex items-center space-x-2 mb-4">
                   <CheckCircle className="w-5 h-5 text-[#00ff88]" />
-                  <h3 className="font-semibold text-[#00ff88]">Deployment Successful!</h3>
+                  <h3 className="font-semibold text-[#00ff88]">Simulated Deployment Complete</h3>
                 </div>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center justify-between">
@@ -292,7 +305,7 @@ const Deploy: React.FC = () => {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-gray-300">Status:</span>
-                    <span className="text-[#00ff88]">Live</span>
+                    <span className="text-[#ffaa00]">Simulated (not live)</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-gray-300">Database:</span>

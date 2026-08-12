@@ -1,5 +1,5 @@
 """
-Django URL Configuration for InfraNest
+Django URL Configuration for Backend Builder
 Generated URLs based on DSL specification
 """
 from django.urls import path, include

@@ -8,5 +8,9 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     include: ['src/**/*.test.{ts,tsx}'],
+    // `threads` (the default) crashes with "Worker exited unexpectedly" in
+    // some sandboxed/Windows shells; `forks` is slightly slower but reliable
+    // everywhere, including plain CI runners.
+    pool: 'forks',
   },
 });

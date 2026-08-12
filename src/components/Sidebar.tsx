@@ -97,18 +97,18 @@ const Sidebar: React.FC = () => {
           {!sidebarCollapsed && (
             <div className="flex items-center space-x-3">
               <div className="relative">
-                <img 
-                  src="/assets/logo.svg" 
-                  alt="InfraNest" 
+                <img
+                  src="/assets/logo.svg"
+                  alt="Backend Builder"
                   className="w-8 h-8"
                 />
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-[#00ff88] rounded-full animate-pulse"></div>
               </div>
               <div>
                 <h1 className="text-xl font-bold bg-gradient-to-r from-[#00ff88] to-[#00ccff] bg-clip-text text-transparent">
-                  InfraNest
+                  Backend Builder
                 </h1>
-                <p className="text-xs text-gray-400 font-mono">v2.0.0-beta</p>
+                <p className="text-xs text-gray-400 font-mono">v1.0.0</p>
               </div>
             </div>
           )}

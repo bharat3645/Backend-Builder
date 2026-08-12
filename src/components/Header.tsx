@@ -51,7 +51,7 @@ const Header: React.FC = () => {
 
       {/* Center Section - Breadcrumb */}
       <div className="flex items-center space-x-2 text-sm text-gray-400">
-        <span>InfraNest</span>
+        <span>Backend Builder</span>
         <span>/</span>
         <span className="text-white">Workspace</span>
       </div>

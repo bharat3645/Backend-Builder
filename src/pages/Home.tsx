@@ -129,13 +129,13 @@ const Home: React.FC = () => {
                   <div className="w-3 h-3 bg-[#ffaa00] rounded-full"></div>
                   <div className="w-3 h-3 bg-[#00ff88] rounded-full"></div>
                 </div>
-                <span className="text-sm text-gray-400 font-mono">InfraNest Terminal</span>
+                <span className="text-sm text-gray-400 font-mono">Backend Builder Terminal</span>
                 <div className="w-16"></div>
               </div>
               <div className="p-4 font-mono text-sm">
                 <div className="flex items-center space-x-2 mb-2">
                   <span className="text-[#00ff88]">➜</span>
-                  <span className="text-[#00ccff]">infranest</span>
+                  <span className="text-[#00ccff]">backend-builder</span>
                   <span className="text-gray-400">describe</span>
                 </div>
                 <div className="text-gray-300">

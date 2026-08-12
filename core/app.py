@@ -1,5 +1,5 @@
 """
-InfraNest Core Generation Engine
+Backend Builder Core Generation Engine
 Flask-based API for DSL parsing and code generation
 """
 
@@ -43,7 +43,7 @@ generators = {
 try:
     from prometheus_flask_exporter import PrometheusMetrics
     metrics = PrometheusMetrics(app)
-    metrics.info('infranest_core_info', 'InfraNest core generation engine', version='1.0.0')
+    metrics.info('backend_builder_core_info', 'Backend Builder core generation engine', version='1.0.0')
 except ImportError:
     logger.warning('prometheus_flask_exporter not installed; /metrics endpoint disabled')
 
@@ -284,7 +284,7 @@ def api_docs():
     html = """<!doctype html>
 <html>
 <head>
-  <title>InfraNest API Docs</title>
+  <title>Backend Builder API Docs</title>
   <meta charset="utf-8" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css" />
   <style>body { margin: 0; background: #1a1a2e; }</style>

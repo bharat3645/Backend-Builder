@@ -1,5 +1,5 @@
 """
-Django Model Template for InfraNest
+Django Model Template for Backend Builder
 Generated models based on DSL specification
 """
 from django.db import models

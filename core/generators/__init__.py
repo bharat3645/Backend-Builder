@@ -1,5 +1,5 @@
 """
-InfraNest code generators.
+Backend Builder code generators.
 
 Each generator turns a validated DSL specification (as produced by
 ``parsers.dsl_parser.DSLParser``) into a dictionary mapping relative file

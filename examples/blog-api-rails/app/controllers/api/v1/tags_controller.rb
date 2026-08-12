@@ -40,7 +40,7 @@ module Api
       end
 
       def tag_params
-        params.require(:tag).permit(:color, :created_at, :name)
+        params.require(:tag).permit(:name, :color, :created_at)
       end
     end
   end

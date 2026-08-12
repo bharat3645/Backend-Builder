@@ -9,15 +9,15 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 
-	"github.com/infranest/blog-api/database"
-	"github.com/infranest/blog-api/models"
-	"github.com/infranest/blog-api/routes"
+	"github.com/backend-builder/blog-api/database"
+	"github.com/backend-builder/blog-api/models"
+	"github.com/backend-builder/blog-api/routes"
 )
 
 func main() {
 	db := database.Connect()
 
-	if err := db.AutoMigrate(&models.Comment{}, &models.Post{}, &models.Tag{}, &models.User{}); err != nil {
+	if err := db.AutoMigrate(&models.User{}, &models.Post{}, &models.Comment{}, &models.Tag{}); err != nil {
 		log.Fatalf("failed to run migrations: %v", err)
 	}
 

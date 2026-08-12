@@ -1,8 +1,8 @@
 {
   "dashboard": {
     "id": null,
-    "title": "InfraNest Overview",
-    "tags": ["infranest", "overview"],
+    "title": "Backend Builder Overview",
+    "tags": ["backend-builder", "overview"],
     "timezone": "browser",
     "panels": [
       {
@@ -11,7 +11,7 @@
         "type": "graph",
         "targets": [
           {
-            "expr": "rate(http_requests_total{job=\"infranest-core\"}[5m])",
+            "expr": "rate(http_requests_total{job=\"backend-builder-core\"}[5m])",
             "legendFormat": "Core API"
           },
           {
@@ -41,11 +41,11 @@
         "type": "graph",
         "targets": [
           {
-            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"infranest-core\"}[5m]))",
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"backend-builder-core\"}[5m]))",
             "legendFormat": "95th percentile"
           },
           {
-            "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket{job=\"infranest-core\"}[5m]))",
+            "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket{job=\"backend-builder-core\"}[5m]))",
             "legendFormat": "50th percentile"
           }
         ],

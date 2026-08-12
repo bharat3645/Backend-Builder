@@ -1,5 +1,5 @@
 """
-Django REST Framework Serializers for InfraNest
+Django REST Framework Serializers for Backend Builder
 Generated serializers based on DSL specification
 """
 from rest_framework import serializers

@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: InfraNest Core Generation Engine API
+  title: Backend Builder Core Generation Engine API
   description: >
     Converts a DSL specification (or a natural-language prompt) into a real,
     runnable backend project for Django + DRF, Go Fiber + GORM, or Ruby on
@@ -11,7 +11,7 @@ info:
     name: MIT
 externalDocs:
   description: Project README
-  url: https://github.com/bharat3645/InfraNest#readme
+  url: https://github.com/bharat3645/Backend-Builder#readme
 servers:
   - url: http://localhost:8000
     description: Local development

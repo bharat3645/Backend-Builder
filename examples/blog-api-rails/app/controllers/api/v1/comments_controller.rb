@@ -40,7 +40,7 @@ module Api
       end
 
       def comment_params
-        params.require(:comment).permit(:author_id, :content, :created_at, :is_approved, :parent_id, :post_id, :updated_at)
+        params.require(:comment).permit(:content, :author_id, :post_id, :parent_id, :is_approved, :created_at, :updated_at)
       end
     end
   end

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-InfraNest Copilot CLI
+Backend Builder Copilot CLI
 AI-powered command-line interface for backend development
 """
 
@@ -23,11 +23,11 @@ console = Console()
 
 # Configuration
 API_BASE_URL = "http://localhost:8000/api/v1"
-CONFIG_FILE = Path.home() / ".infranest" / "config.json"
+CONFIG_FILE = Path.home() / ".backend-builder" / "config.json"
 
 
-class InfraNestCopilot:
-    """InfraNest Copilot CLI client"""
+class BackendBuilderCopilot:
+    """Backend Builder Copilot CLI client"""
     
     def __init__(self):
         self.config = self.load_config()
@@ -243,10 +243,10 @@ class InfraNestCopilot:
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')
 @click.pass_context
 def cli(ctx, verbose):
-    """InfraNest Copilot - AI-powered backend development CLI"""
+    """Backend Builder Copilot - AI-powered backend development CLI"""
     ctx.ensure_object(dict)
     ctx.obj['verbose'] = verbose
-    ctx.obj['copilot'] = InfraNestCopilot()
+    ctx.obj['copilot'] = BackendBuilderCopilot()
 
 
 @cli.command(name='describe_backend')

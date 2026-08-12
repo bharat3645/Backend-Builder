@@ -221,7 +221,7 @@ const Dashboard: React.FC = () => {
             <div className="p-12 text-center">
               <Database className="w-16 h-16 text-gray-500 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-white mb-2">No Projects Yet</h3>
-              <p className="text-gray-400 mb-6">Start building your first backend with InfraNest</p>
+              <p className="text-gray-400 mb-6">Start building your first backend with Backend Builder</p>
               <a
                 href="/prompt"
                 className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-[#00ff88] to-[#00ccff] text-black rounded-lg font-semibold transition-all hover:shadow-lg hover:shadow-[#00ff88]/25"

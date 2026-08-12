@@ -1,6 +1,6 @@
-# InfraNest Copilot CLI
+# Backend Builder Copilot CLI
 
-The InfraNest Copilot is an AI-powered command-line interface that helps you build, deploy, and manage backend services with natural language.
+The Backend Builder Copilot is an AI-powered command-line interface that helps you build, deploy, and manage backend services with natural language.
 
 ## Installation
 
@@ -67,7 +67,7 @@ python copilot.py simulate_api blog.yml /api/v1/posts/ --method GET
 
 ## Configuration
 
-The CLI stores configuration in `~/.infranest/config.json`.
+The CLI stores configuration in `~/.backend-builder/config.json`.
 
 ## Commands
 
@@ -80,7 +80,7 @@ The CLI stores configuration in `~/.infranest/config.json`.
 - `simulate_api` - Simulate API responses
 
 > **Note:** `describe_backend`, `preview_code`, and `generate_code` call the
-> real InfraNest core API (`core/app.py`) and require it to be running at
+> real Backend Builder core API (`core/app.py`) and require it to be running at
 > `http://localhost:8000`. `deploy_project`, `view_logs`, `run_audit`, and
 > `simulate_api` are currently simulated client-side (no cloud provider or
 > log-aggregation backend exists yet) so the CLI's UX can be tried end to

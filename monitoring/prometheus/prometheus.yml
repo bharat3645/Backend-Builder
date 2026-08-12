@@ -6,8 +6,8 @@ rule_files:
   - "rules/*.yml"
 
 scrape_configs:
-  # InfraNest Core API
-  - job_name: 'infranest-core'
+  # Backend Builder Core API
+  - job_name: 'backend-builder-core'
     static_configs:
       - targets: ['core-api:8000']
     metrics_path: '/metrics'

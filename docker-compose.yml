@@ -32,7 +32,7 @@ services:
     environment:
       - FLASK_ENV=development
       - CORS_ORIGINS=http://localhost:3000,http://localhost:5173
-      - DATABASE_URL=postgresql://infranest:infranest@postgres:5432/infranest
+      - DATABASE_URL=postgresql://backend_builder:backend_builder@postgres:5432/backend_builder
       - REDIS_URL=redis://redis:6379
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
@@ -44,9 +44,9 @@ services:
   postgres:
     image: postgres:15-alpine
     environment:
-      - POSTGRES_DB=infranest
-      - POSTGRES_USER=infranest
-      - POSTGRES_PASSWORD=infranest
+      - POSTGRES_DB=backend_builder
+      - POSTGRES_USER=backend_builder
+      - POSTGRES_PASSWORD=backend_builder
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:

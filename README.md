@@ -1,17 +1,17 @@
 <div align="center">
-  <img src="./public/assets/logo.svg" width="72" height="72" alt="InfraNest logo" />
+  <img src="./public/assets/logo.svg" width="72" height="72" alt="Backend Builder logo" />
 
-  # InfraNest
+  # Backend Builder
 
   **Describe a backend in plain English. Get a real, runnable one back.**
 
-  InfraNest turns a natural-language prompt (or a hand-written YAML spec) into a
-  production-ready **Django + DRF**, **Go Fiber + GORM**, or **Ruby on Rails**
-  backend project — models, serializers/views, migrations, auth, and Docker
-  config included — through a web UI, a CLI, or a REST API.
+  Backend Builder turns a natural-language prompt (or a hand-written YAML spec)
+  into a production-ready **Django + DRF**, **Go Fiber + GORM**, or **Ruby on
+  Rails** backend project — models, serializers/views, migrations, auth, and
+  Docker config included — through a web UI, a CLI, or a REST API.
 
-  [![CI](https://github.com/bharat3645/InfraNest/actions/workflows/ci.yml/badge.svg)](https://github.com/bharat3645/InfraNest/actions/workflows/ci.yml)
-  [![License: MIT](https://img.shields.io/github/license/bharat3645/InfraNest)](./LICENSE)
+  [![CI](https://github.com/bharat3645/Backend-Builder/actions/workflows/ci.yml/badge.svg)](https://github.com/bharat3645/Backend-Builder/actions/workflows/ci.yml)
+  [![License: MIT](https://img.shields.io/github/license/bharat3645/Backend-Builder)](./LICENSE)
   [![Python](https://img.shields.io/badge/python-3.11%2B-3776AB?logo=python&logoColor=white)](./core/requirements.txt)
   [![Node](https://img.shields.io/badge/node-20%2B-339933?logo=node.js&logoColor=white)](./package.json)
   [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)](./package.json)
@@ -20,15 +20,27 @@
   [Quick Start](#-quick-start) · [Features](#-features) · [Architecture](#-architecture) · [Usage](#-usage) · [API Docs](#-api-documentation) · [Testing](#-testing)
 </div>
 
+> **Relationship to [InfraNest (PRISM)](https://github.com/bharat3645/prism-infranest):**
+> both projects generate backend code from a DSL/natural-language prompt, but
+> they are separate, independently-evolved codebases at different scope and
+> maturity levels, not the same repo published twice. Backend Builder is the
+> smaller, test-covered core engine (3 generators, a deterministic parser
+> with optional OpenAI/Claude, a CLI, no accounts). InfraNest (PRISM) is a
+> larger research-oriented platform layering multi-LLM follow-up-question
+> generation, an evaluation/benchmarking subsystem, and an experimental local
+> "intelligent analyzer" on top of a similar generation core. Pick this repo
+> if you want a small, honestly-scoped generator you can read end to end;
+> pick InfraNest (PRISM) if you want the larger feature surface.
+
 ---
 
 ## Overview
 
 Bootstrapping a new backend service means writing the same models, CRUD
 endpoints, auth wiring, and Docker config over and over — in whichever
-framework the team happens to use. InfraNest collapses that into one step:
-describe the system once, in English or in a small declarative DSL, and get a
-real project back for the framework you actually need.
+framework the team happens to use. Backend Builder collapses that into one
+step: describe the system once, in English or in a small declarative DSL, and
+get a real project back for the framework you actually need.
 
 ```
 "A blog API with users, posts, and comments. Users can register with
@@ -36,9 +48,9 @@ real project back for the framework you actually need.
  published flag. Comments belong to a post and a user."
                               │
                               ▼
-                    ┌───────────────────┐
-                    │   InfraNest DSL    │   ← inspect / hand-edit before generating
-                    └───────────────────┘
+                    ┌───────────────────────┐
+                    │  Backend Builder DSL   │   ← inspect / hand-edit before generating
+                    └───────────────────────┘
                               │
               ┌───────────────┼───────────────┐
               ▼               ▼               ▼
@@ -70,7 +82,7 @@ output that's been checked with each framework's own toolchain.
   checked for balanced braces, Rails migrations checked for FK dependency
   ordering, every Flask endpoint hit through the real test client. See
   [`core/tests/`](./core/tests)
-- **18 frontend Vitest tests** covering the API client's error handling and
+- **25 frontend Vitest tests** covering the API client's error handling and
   the Zustand stores' state transitions — see [`src/lib/*.test.ts`](./src/lib)
 - **Real input validation & JSON error responses**: malformed DSL, an
   unsupported framework, or a non-JSON body returns a clean `400` with a
@@ -90,7 +102,7 @@ output that's been checked with each framework's own toolchain.
 ## 🏗️ Architecture
 
 ```
-InfraNest/
+Backend-Builder/
 ├── .github/workflows/        # CI: pytest, frontend build/lint/test, generator smoke-build
 ├── src/, index.html           # React + Vite frontend (the web UI)
 │   ├── components/            # Navbar, Sidebar, Header
@@ -138,13 +150,13 @@ and returned to the client.
 - [Python](https://www.python.org) 3.11+
 - (Optional) Docker + Docker Compose for the one-command setup
 - (Optional) an OpenAI or Anthropic API key for LLM-backed prompt parsing —
-  InfraNest works without one, using a deterministic fallback parser
+  Backend Builder works without one, using a deterministic fallback parser
 
 ### Clone the repository
 
 ```bash
-git clone https://github.com/bharat3645/InfraNest.git
-cd InfraNest
+git clone https://github.com/bharat3645/Backend-Builder.git
+cd Backend-Builder
 ```
 
 ### Run it locally
@@ -239,7 +251,7 @@ npm run test:run
 | Suite | What it covers | Result |
 |---|---|---|
 | `core/tests/` (pytest) | DSL validation, Django/Go/Rails generators, every Flask endpoint, agentic parser fallback | 74 tests, 94% line coverage |
-| `src/lib/*.test.ts` (Vitest) | API client error handling, Zustand store transitions | 18 tests |
+| `src/lib/*.test.ts` (Vitest) | API client error handling, Zustand store transitions | 25 tests |
 | CI `generator-smoke` job | Generates a real project per framework and builds it with that ecosystem's own toolchain | `manage.py check`, `go build && go vet`, `ruby -c` all clean |
 
 CI runs all of the above on every push — see
@@ -257,7 +269,11 @@ before the real infrastructure exists): cloud deployment, log aggregation,
 and the Kafka-based event mesh that `docker-compose.yml` provisions but
 nothing currently talks to. The `copilot` CLI's `deploy_project`, `view_logs`,
 `run_audit`, and `simulate_api` commands are client-side simulations for the
-same reason.
+same reason, and the web UI's **Deploy** page carries a visible "Simulated"
+notice for the same reason - no cloud infrastructure is provisioned by
+either. There are also no user accounts: `src/lib/store.ts` keeps your
+projects in this browser's local storage only, since `core/app.py` has no
+database or auth of its own.
 
 ## 📚 Further Documentation
 
@@ -266,6 +282,9 @@ same reason.
 - [Copilot CLI](./copilot/README.md)
 - [Example generated projects](./examples/README.md)
 - [OpenAPI spec source](./core/openapi.yaml) (interactive version at `/docs`)
+- [InfraNest (PRISM)](https://github.com/bharat3645/prism-infranest) - a
+  separate, larger platform covering similar ground (see the note at the top
+  of this README for how the two relate)
 
 ## 🤝 Contributing
 

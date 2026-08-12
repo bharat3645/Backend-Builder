@@ -1,5 +1,5 @@
 """
-Agentic Parser for InfraNest
+Agentic Parser for Backend Builder
 Converts natural language prompts to DSL specifications, optionally using
 an LLM (OpenAI or Anthropic) when an API key is configured. Falls back to a
 deterministic, keyword-based DSL generator so the platform is fully usable
@@ -14,9 +14,9 @@ import yaml
 
 logger = logging.getLogger(__name__)
 
-SYSTEM_PROMPT = """You are an expert backend architect. Convert natural language descriptions into InfraNest DSL specifications.
+SYSTEM_PROMPT = """You are an expert backend architect. Convert natural language descriptions into Backend Builder DSL specifications.
 
-Generate valid YAML that follows the InfraNest DSL schema:
+Generate valid YAML that follows the Backend Builder DSL schema:
 
 - meta: Project metadata (name, version, framework, database)
 - auth: Authentication configuration

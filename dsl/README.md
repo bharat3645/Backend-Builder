@@ -1,6 +1,6 @@
-# InfraNest DSL Specification
+# Backend Builder DSL Specification
 
-The InfraNest DSL (Domain Specific Language) provides a declarative way to describe backend systems that can be converted into production-ready code across multiple frameworks.
+The Backend Builder DSL (Domain Specific Language) provides a declarative way to describe backend systems that can be converted into production-ready code across multiple frameworks.
 
 ## Structure
 
@@ -106,7 +106,7 @@ If you write a field property literally named `null` (e.g. to mean
 "this foreign key is nullable"), quote the key: `"null": true`. YAML parses
 an unquoted `null:` as the null/`None` key rather than the string `"null"`,
 which silently breaks the property lookup (and can crash JSON serialization
-of the spec). InfraNest's parser normalizes this defensively, but generators
+of the spec). Backend Builder's parser normalizes this defensively, but generators
 that expect a string key `"null"` still won't see it if it comes through
 as an actual `None` upstream of the parser.
 

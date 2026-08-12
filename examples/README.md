@@ -1,8 +1,8 @@
 # Example Generated Projects
 
-These are real, verified outputs of the InfraNest generation engine (`core/generators/`)
+These are real, verified outputs of the Backend Builder generation engine (`core/generators/`)
 from [`dsl/example_blog.yml`](../dsl/example_blog.yml) - a blog API with `User`, `Post`,
-`Comment`, and `Tag` models. They're checked into the repo so you can see what InfraNest
+`Comment`, and `Tag` models. They're checked into the repo so you can see what Backend Builder
 actually produces without running the generator yourself.
 
 | Directory | Framework | Verified with |

@@ -1,5 +1,5 @@
 """
-Shared pytest fixtures for the InfraNest core engine test suite.
+Shared pytest fixtures for the Backend Builder core engine test suite.
 """
 
 import copy

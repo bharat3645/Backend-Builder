@@ -1,5 +1,5 @@
 """
-Django REST Framework Views for InfraNest
+Django REST Framework Views for Backend Builder
 Generated views based on DSL specification
 """
 from rest_framework import viewsets, status, permissions

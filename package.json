@@ -1,18 +1,18 @@
 {
-  "name": "infranest",
+  "name": "backend-builder",
   "private": true,
   "version": "1.0.0",
   "type": "module",
   "description": "AI-powered platform that turns natural language or a DSL spec into production-ready Django, Go Fiber, or Ruby on Rails backend projects.",
   "author": "Bharat Singh Parihar (https://github.com/bharat3645)",
   "license": "MIT",
-  "homepage": "https://github.com/bharat3645/InfraNest#readme",
+  "homepage": "https://github.com/bharat3645/Backend-Builder#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bharat3645/InfraNest.git"
+    "url": "git+https://github.com/bharat3645/Backend-Builder.git"
   },
   "bugs": {
-    "url": "https://github.com/bharat3645/InfraNest/issues"
+    "url": "https://github.com/bharat3645/Backend-Builder/issues"
   },
   "scripts": {
     "dev": "vite",

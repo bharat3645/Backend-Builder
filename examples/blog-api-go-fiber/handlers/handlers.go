@@ -5,13 +5,13 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 
-	"github.com/infranest/blog-api/models"
+	"github.com/backend-builder/blog-api/models"
 )
 
-// ListComment returns every Comment record.
-func ListComment(db *gorm.DB) fiber.Handler {
+// ListUser returns every User record.
+func ListUser(db *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		var items []models.Comment
+		var items []models.User
 		if err := db.Find(&items).Error; err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 		}
@@ -19,10 +19,10 @@ func ListComment(db *gorm.DB) fiber.Handler {
 	}
 }
 
-// GetComment returns a single Comment by id.
-func GetComment(db *gorm.DB) fiber.Handler {
+// GetUser returns a single User by id.
+func GetUser(db *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		var item models.Comment
+		var item models.User
 		if err := db.First(&item, "id = ?", c.Params("id")).Error; err != nil {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "not found"})
 		}
@@ -30,12 +30,19 @@ func GetComment(db *gorm.DB) fiber.Handler {
 	}
 }
 
-// CreateComment creates a new Comment.
-func CreateComment(db *gorm.DB) fiber.Handler {
+// CreateUser creates a new User.
+func CreateUser(db *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		var item models.Comment
+		var item models.User
 		if err := c.BodyParser(&item); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		}
+		if item.Password != "" {
+			hashed, err := bcrypt.GenerateFromPassword([]byte(item.Password), bcrypt.DefaultCost)
+			if err != nil {
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to hash password"})
+			}
+			item.Password = string(hashed)
 		}
 		if err := db.Create(&item).Error; err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
@@ -44,14 +51,14 @@ func CreateComment(db *gorm.DB) fiber.Handler {
 	}
 }
 
-// UpdateComment updates an existing Comment.
-func UpdateComment(db *gorm.DB) fiber.Handler {
+// UpdateUser updates an existing User.
+func UpdateUser(db *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		var item models.Comment
+		var item models.User
 		if err := db.First(&item, "id = ?", c.Params("id")).Error; err != nil {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "not found"})
 		}
-		var updates models.Comment
+		var updates models.User
 		if err := c.BodyParser(&updates); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 		}
@@ -62,10 +69,10 @@ func UpdateComment(db *gorm.DB) fiber.Handler {
 	}
 }
 
-// DeleteComment deletes a Comment by id.
-func DeleteComment(db *gorm.DB) fiber.Handler {
+// DeleteUser deletes a User by id.
+func DeleteUser(db *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		if err := db.Delete(&models.Comment{}, "id = ?", c.Params("id")).Error; err != nil {
+		if err := db.Delete(&models.User{}, "id = ?", c.Params("id")).Error; err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 		}
 		return c.SendStatus(fiber.StatusNoContent)
@@ -136,6 +143,70 @@ func DeletePost(db *gorm.DB) fiber.Handler {
 	}
 }
 
+// ListComment returns every Comment record.
+func ListComment(db *gorm.DB) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		var items []models.Comment
+		if err := db.Find(&items).Error; err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		}
+		return c.JSON(items)
+	}
+}
+
+// GetComment returns a single Comment by id.
+func GetComment(db *gorm.DB) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		var item models.Comment
+		if err := db.First(&item, "id = ?", c.Params("id")).Error; err != nil {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "not found"})
+		}
+		return c.JSON(item)
+	}
+}
+
+// CreateComment creates a new Comment.
+func CreateComment(db *gorm.DB) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		var item models.Comment
+		if err := c.BodyParser(&item); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		}
+		if err := db.Create(&item).Error; err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		}
+		return c.Status(fiber.StatusCreated).JSON(item)
+	}
+}
+
+// UpdateComment updates an existing Comment.
+func UpdateComment(db *gorm.DB) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		var item models.Comment
+		if err := db.First(&item, "id = ?", c.Params("id")).Error; err != nil {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "not found"})
+		}
+		var updates models.Comment
+		if err := c.BodyParser(&updates); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		}
+		if err := db.Model(&item).Updates(updates).Error; err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		}
+		return c.JSON(item)
+	}
+}
+
+// DeleteComment deletes a Comment by id.
+func DeleteComment(db *gorm.DB) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		if err := db.Delete(&models.Comment{}, "id = ?", c.Params("id")).Error; err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		}
+		return c.SendStatus(fiber.StatusNoContent)
+	}
+}
+
 // ListTag returns every Tag record.
 func ListTag(db *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
@@ -194,77 +265,6 @@ func UpdateTag(db *gorm.DB) fiber.Handler {
 func DeleteTag(db *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		if err := db.Delete(&models.Tag{}, "id = ?", c.Params("id")).Error; err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-		}
-		return c.SendStatus(fiber.StatusNoContent)
-	}
-}
-
-// ListUser returns every User record.
-func ListUser(db *gorm.DB) fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		var items []models.User
-		if err := db.Find(&items).Error; err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-		}
-		return c.JSON(items)
-	}
-}
-
-// GetUser returns a single User by id.
-func GetUser(db *gorm.DB) fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		var item models.User
-		if err := db.First(&item, "id = ?", c.Params("id")).Error; err != nil {
-			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "not found"})
-		}
-		return c.JSON(item)
-	}
-}
-
-// CreateUser creates a new User.
-func CreateUser(db *gorm.DB) fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		var item models.User
-		if err := c.BodyParser(&item); err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
-		}
-		if item.Password != "" {
-			hashed, err := bcrypt.GenerateFromPassword([]byte(item.Password), bcrypt.DefaultCost)
-			if err != nil {
-				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to hash password"})
-			}
-			item.Password = string(hashed)
-		}
-		if err := db.Create(&item).Error; err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-		}
-		return c.Status(fiber.StatusCreated).JSON(item)
-	}
-}
-
-// UpdateUser updates an existing User.
-func UpdateUser(db *gorm.DB) fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		var item models.User
-		if err := db.First(&item, "id = ?", c.Params("id")).Error; err != nil {
-			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "not found"})
-		}
-		var updates models.User
-		if err := c.BodyParser(&updates); err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
-		}
-		if err := db.Model(&item).Updates(updates).Error; err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-		}
-		return c.JSON(item)
-	}
-}
-
-// DeleteUser deletes a User by id.
-func DeleteUser(db *gorm.DB) fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		if err := db.Delete(&models.User{}, "id = ?", c.Params("id")).Error; err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 		}
 		return c.SendStatus(fiber.StatusNoContent)

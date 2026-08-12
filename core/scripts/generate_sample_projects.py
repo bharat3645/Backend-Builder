@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate a real project from a DSL file using InfraNest's generators
+Generate a real project from a DSL file using Backend Builder's generators
 directly (no running Flask server required).
 
 Used by CI (.github/workflows/ci.yml) to produce output that the Django,

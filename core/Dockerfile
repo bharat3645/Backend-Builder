@@ -1,5 +1,5 @@
 # Build from the repository root, e.g.:
-#   docker build -f core/Dockerfile -t infranest-core .
+#   docker build -f core/Dockerfile -t backend-builder-core .
 # (docker-compose.yml already does this for you). Building from the repo
 # root - rather than from ./core alone - lets this image also bundle
 # ../templates, which core/generators/*.py load at runtime.
