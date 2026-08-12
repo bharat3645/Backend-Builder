@@ -77,3 +77,6 @@ out/
 dist/
 build/
 *.tsbuildinfo
+
+# CI workflow (pending gh token 'workflow' OAuth scope)
+.github/workflows/ci.yml
